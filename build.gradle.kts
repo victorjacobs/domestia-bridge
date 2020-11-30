@@ -4,6 +4,7 @@ val logbackVersion = "1.2.3"
 val hopliteVersion = "1.3.9"
 val kotlinVersion = "1.4.20"
 val kotlinxCoroutinesVersion = "1.4.2"
+val pahoVersion = "1.2.0"
 
 plugins {
     application
@@ -21,7 +22,9 @@ repositories {
 }
 
 application {
-    mainClass.set("dev.vjcbs.domestiabridge.MainKt")
+    // The shadow plugin can't yet read the new property for main class
+//    mainClass.set("dev.vjcbs.domestiabridge.MainKt")
+    mainClassName = "dev.vjcbs.domestiabridge.MainKt"
 }
 
 dependencies {
@@ -32,6 +35,7 @@ dependencies {
     implementation("ch.qos.logback:logback-classic:$logbackVersion")
     implementation("com.sksamuel.hoplite:hoplite-core:$hopliteVersion")
     implementation("com.sksamuel.hoplite:hoplite-yaml:$hopliteVersion")
+    implementation("org.eclipse.paho:org.eclipse.paho.client.mqttv3:$pahoVersion")
 }
 
 tasks.withType<KotlinCompile> {

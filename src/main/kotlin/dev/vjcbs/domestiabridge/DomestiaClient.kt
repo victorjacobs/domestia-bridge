@@ -2,11 +2,12 @@ package dev.vjcbs.domestiabridge
 
 import java.io.*
 import java.net.Socket
+import java.util.concurrent.locks.ReentrantLock
 
-// TODO make thread safe
 class DomestiaClient(
-    config: Config
+    config: DomestiaConfig
 ) {
+    private val lock = ReentrantLock()
     private val log = logger()
 
     private val socket = Socket(config.ipAddress, 52001)
@@ -14,7 +15,7 @@ class DomestiaClient(
     private val inputStream = DataInputStream(socket.getInputStream())
     private val outputToLightConfig = config.lights.map {l -> l.output - 1 to l}.toMap()
 
-    fun getStatus(): List<Light> {
+    fun getStatus(): List<Light> = synchronized(lock) {
         outputStream.write("ff0000013c3c20".hexStringToByteArray())
 
         // Status response is 51 bytes (maybe variable)
@@ -24,16 +25,21 @@ class DomestiaClient(
         // First three bytes are the header
         return response.drop(3).mapIndexed { index, byte ->
             outputToLightConfig[index]?.let {
-                Light(
-                    it.name,
-                    it.output,
-                    byte.toInt() != 0
-                )
+                if (it.ignore) {
+                    null
+                } else {
+                    Light(
+                        it.name,
+                        it.output,
+                        byte.toInt() != 0,
+                        it.dimmable
+                    )
+                }
             }
         }.filterNotNull()
     }
 
-    private fun sendToggleCommand(command: String, output: Int) {
+    private fun sendToggleCommand(command: String, output: Int) = synchronized(lock) {
         val outputHex = output.toByte().toHex()
         val checksumHex = (command.hexStringToByteArray().first().toInt() + output).toByte().toHex()
 
@@ -49,14 +55,14 @@ class DomestiaClient(
         log.info("Response: ${String(response)}")
     }
 
-    fun turnOnLight(output: Int) {
+    fun turnOnLight(light: Light) {
         // On is 0e
-        sendToggleCommand("0e", output)
+        sendToggleCommand("0e", light.output)
     }
 
-    fun turnOffLight(output: Int) {
+    fun turnOffLight(light: Light) {
         // Off is 0f
-        sendToggleCommand("0f", output)
+        sendToggleCommand("0f", light.output)
     }
 
     private fun Byte.toHex() = this.toInt().and(0xff).toString(16).padStart(2, '0')
