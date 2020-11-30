@@ -13,7 +13,7 @@ fun main(): Unit = runBlocking {
     val mqttClient = MqttClient(config.mqtt)
 
     val entityIdToLight = domestiaClient.getStatus().map { l -> l.entityId to l }.toMap().toMutableMap()
-    // Publish all configuration and state
+    // Publish all configuration and state + subscribe to command topics
     entityIdToLight.forEach { (_, l) ->
         mqttClient.publish(l.configTopic, l.configuration)
         delay(500)

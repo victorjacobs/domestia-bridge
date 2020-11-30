@@ -2,31 +2,61 @@ package dev.vjcbs.domestiabridge
 
 import java.io.DataInputStream
 import java.io.DataOutputStream
-import java.io.EOFException
 import java.net.Socket
 import java.util.concurrent.locks.ReentrantLock
 
 class DomestiaClient(
-    config: DomestiaConfig
+    private val config: DomestiaConfig
 ) {
     private val lock = ReentrantLock()
     private val log = logger()
 
-    private val socket = Socket(config.ipAddress, 52001)
-    private val outputStream = DataOutputStream(socket.getOutputStream())
-    private val inputStream = DataInputStream(socket.getInputStream())
+    private lateinit var socket: Socket
+    private lateinit var outputStream: DataOutputStream
+    private lateinit var inputStream: DataInputStream
+
     private val outputToLightConfig = config.lights.map { l -> l.output - 1 to l }.toMap()
 
-    fun getStatus(): List<Light> = synchronized(lock) {
-        outputStream.write("ff0000013c3c20".hexStringToByteArray())
+    init {
+        connect()
+    }
 
-        // Status response is 51 bytes (maybe variable)
+    private fun connect() {
+        socket = Socket(config.ipAddress, 52001)
+        outputStream = DataOutputStream(socket.getOutputStream())
+        inputStream = DataInputStream(socket.getInputStream())
+    }
+
+    private fun writeSafely(data: ByteArray) = synchronized(lock) {
+        try {
+            outputStream.write(data)
+        } catch (e: Exception) {
+            log.warn("Writing to socket failed, reopening (${e.message})")
+            connect()
+            outputStream.write(data)
+        }
+    }
+
+    // TODO readwrite should be in same synchronized block
+    private fun readSafely(length: Int): ByteArray = synchronized(lock) {
         val response = ByteArray(51)
+
         try {
             inputStream.readFully(response, 0, response.size)
-        } catch (_: EOFException) {
-            log.warn("End of file reached")
+        } catch (e: Exception) {
+            log.warn("Reading from socket failed, reopening (${e.message})")
+            connect()
+            inputStream.readFully(response, 0, response.size)
         }
+
+        return response
+    }
+
+    fun getStatus(): List<Light> {
+        writeSafely("ff0000013c3c20".hexStringToByteArray())
+
+        // Status response is 51 bytes (maybe variable)
+        val response = readSafely(51)
 
         // First three bytes are the header
         return response.drop(3).mapIndexed { index, byte ->
@@ -45,7 +75,7 @@ class DomestiaClient(
         }.filterNotNull()
     }
 
-    private fun sendToggleCommand(command: String, output: Int) = synchronized(lock) {
+    private fun sendToggleCommand(command: String, output: Int) {
         val outputHex = output.toByte().toHex()
         val checksumHex = (command.hexStringToByteArray().first().toInt() + output).toByte().toHex()
 
