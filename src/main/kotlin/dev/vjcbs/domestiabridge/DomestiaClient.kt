@@ -28,6 +28,8 @@ class DomestiaClient(
     }
 
     private fun writeSafely(data: ByteArray) = synchronized(lock) {
+        log.info("Sending ${data.toHex()}")
+
         try {
             outputStream.write(data)
         } catch (e: Exception) {
@@ -49,6 +51,8 @@ class DomestiaClient(
             connect()
             inputStream.readFully(response, 0, response.size)
         }
+
+        log.info("Received ${response.toHex()}")
 
         return response
     }
@@ -80,12 +84,7 @@ class DomestiaClient(
 
         val commandHex = "ff000002${command}${outputHex}$checksumHex"
 
-        log.info("Sending $commandHex")
-        outputStream.write(commandHex.hexStringToByteArray())
-
-        // Toggle commands respond "OK"
-        val response = ByteArray(2)
-        inputStream.readFully(response, 0, response.size)
+        val response = writeSafelyWithResponse(commandHex.hexStringToByteArray(), 2)
 
         log.info("Response: ${String(response)}")
     }

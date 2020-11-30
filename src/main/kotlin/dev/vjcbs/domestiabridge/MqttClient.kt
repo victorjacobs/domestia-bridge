@@ -28,7 +28,7 @@ class MqttClient(
     }
 
     fun publish(topic: String, data: String) {
-        log.info("[$topic] Publishing $data")
+        log.info("[$topic] Publishing ${data.replace("\n","").replace(" ", "")}")
 
         mqtt.publish(
             topic,
