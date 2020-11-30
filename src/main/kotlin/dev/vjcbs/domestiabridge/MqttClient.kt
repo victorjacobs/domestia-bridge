@@ -11,7 +11,6 @@ class MqttClient(
     config: MqttConfig
 ) {
     private val log = logger()
-    // This is the sync client I think
     private val mqtt = Paho(
         "tcp://${config.ipAddress}:1883",
         "domestia-${UUID.randomUUID()}",
