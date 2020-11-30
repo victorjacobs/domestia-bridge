@@ -31,7 +31,9 @@ class MqttClient(
     fun publish(topic: String, data: String) {
         log.info("[$topic] Publishing $data")
 
-        mqtt.publish(topic, MqttMessage(data.toByteArray()))
+        mqtt.publish(topic, MqttMessage(data.toByteArray()).apply {
+            isRetained = true
+        })
     }
 
     fun subscribe(topic: String, callback: ((String) -> Unit)) {
