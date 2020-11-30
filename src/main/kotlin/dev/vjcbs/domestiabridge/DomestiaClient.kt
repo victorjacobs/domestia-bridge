@@ -37,9 +37,10 @@ class DomestiaClient(
         }
     }
 
-    // TODO readwrite should be in same synchronized block
-    private fun readSafely(length: Int): ByteArray = synchronized(lock) {
-        val response = ByteArray(51)
+    private fun writeSafelyWithResponse(data: ByteArray, responseLength: Int): ByteArray = synchronized(lock) {
+        writeSafely(data)
+
+        val response = ByteArray(responseLength)
 
         try {
             inputStream.readFully(response, 0, response.size)
@@ -53,10 +54,8 @@ class DomestiaClient(
     }
 
     fun getStatus(): List<Light> {
-        writeSafely("ff0000013c3c20".hexStringToByteArray())
-
         // Status response is 51 bytes (maybe variable)
-        val response = readSafely(51)
+        val response = writeSafelyWithResponse("ff0000013c3c20".hexStringToByteArray(), 51)
 
         // First three bytes are the header
         return response.drop(3).mapIndexed { index, byte ->
