@@ -49,7 +49,7 @@ class DomestiaClient(
         } catch (e: Exception) {
             log.warn("Reading from socket failed, reopening (${e.message})")
             connect()
-            inputStream.readFully(response, 0, response.size)
+            // Makes no sense to try and read again since we've lost the connection
         }
 
         log.info("Received ${response.toHex()}")
