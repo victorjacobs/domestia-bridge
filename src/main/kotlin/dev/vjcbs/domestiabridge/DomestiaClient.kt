@@ -27,6 +27,14 @@ class DomestiaClient(
         inputStream = DataInputStream(socket.getInputStream())
     }
 
+    fun reconnect() = synchronized(lock) {
+        outputStream.close()
+        inputStream.close()
+        socket.close()
+
+        connect()
+    }
+
     private fun writeSafely(data: ByteArray) = synchronized(lock) {
         log.info("Sending ${data.toHex()}")
 
@@ -78,6 +86,16 @@ class DomestiaClient(
         }.filterNotNull()
     }
 
+    fun turnOnLight(light: Light) {
+        // On is 0e
+        sendToggleCommand("0e", light.output)
+    }
+
+    fun turnOffLight(light: Light) {
+        // Off is 0f
+        sendToggleCommand("0f", light.output)
+    }
+
     private fun sendToggleCommand(command: String, output: Int) {
         val outputHex = output.toByte().toHex()
         val checksumHex = (command.hexStringToByteArray().first().toInt() + output).toByte().toHex()
@@ -87,16 +105,6 @@ class DomestiaClient(
         val response = writeSafelyWithResponse(commandHex.hexStringToByteArray(), 2)
 
         log.info("Response: ${String(response)}")
-    }
-
-    fun turnOnLight(light: Light) {
-        // On is 0e
-        sendToggleCommand("0e", light.output)
-    }
-
-    fun turnOffLight(light: Light) {
-        // Off is 0f
-        sendToggleCommand("0f", light.output)
     }
 
     private fun Byte.toHex() = this.toInt().and(0xff).toString(16).padStart(2, '0')
