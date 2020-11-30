@@ -12,7 +12,8 @@ data class Light(
     val stateTopic = "homeassistant/light/$entityId/state"
     val cmdTopic = "homeassistant/light/$entityId/set"
 
-    val configuration = """
+    val configuration =
+        """
         {
           "name": "$name",
           "unique_id": "$uniqueId",
@@ -21,12 +22,13 @@ data class Light(
           "schema": "json",
           "brightness": $dimmable
         }
-    """.trimIndent()
+        """.trimIndent()
 
     // {"state": "ON", "brightness": 255}
-    val state = """
+    val state =
+        """
         {
           "state": "${if (on) "ON" else "OFF"}"
         }
-    """.trimIndent()
+        """.trimIndent()
 }

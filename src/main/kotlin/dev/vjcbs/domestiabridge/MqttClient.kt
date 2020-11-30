@@ -3,9 +3,8 @@ package dev.vjcbs.domestiabridge
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions
 import org.eclipse.paho.client.mqttv3.MqttMessage
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence
-import java.util.*
+import java.util.UUID
 import org.eclipse.paho.client.mqttv3.MqttClient as Paho
-
 
 class MqttClient(
     config: MqttConfig
@@ -31,9 +30,12 @@ class MqttClient(
     fun publish(topic: String, data: String) {
         log.info("[$topic] Publishing $data")
 
-        mqtt.publish(topic, MqttMessage(data.toByteArray()).apply {
-            isRetained = true
-        })
+        mqtt.publish(
+            topic,
+            MqttMessage(data.toByteArray()).apply {
+                isRetained = true
+            }
+        )
     }
 
     fun subscribe(topic: String, callback: ((String) -> Unit)) {

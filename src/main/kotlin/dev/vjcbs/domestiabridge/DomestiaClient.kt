@@ -1,6 +1,8 @@
 package dev.vjcbs.domestiabridge
 
-import java.io.*
+import java.io.DataInputStream
+import java.io.DataOutputStream
+import java.io.EOFException
 import java.net.Socket
 import java.util.concurrent.locks.ReentrantLock
 
@@ -13,14 +15,18 @@ class DomestiaClient(
     private val socket = Socket(config.ipAddress, 52001)
     private val outputStream = DataOutputStream(socket.getOutputStream())
     private val inputStream = DataInputStream(socket.getInputStream())
-    private val outputToLightConfig = config.lights.map {l -> l.output - 1 to l}.toMap()
+    private val outputToLightConfig = config.lights.map { l -> l.output - 1 to l }.toMap()
 
     fun getStatus(): List<Light> = synchronized(lock) {
         outputStream.write("ff0000013c3c20".hexStringToByteArray())
 
         // Status response is 51 bytes (maybe variable)
         val response = ByteArray(51)
-        inputStream.readFully(response, 0, response.size)
+        try {
+            inputStream.readFully(response, 0, response.size)
+        } catch (_: EOFException) {
+            log.warn("End of file reached")
+        }
 
         // First three bytes are the header
         return response.drop(3).mapIndexed { index, byte ->
@@ -43,7 +49,7 @@ class DomestiaClient(
         val outputHex = output.toByte().toHex()
         val checksumHex = (command.hexStringToByteArray().first().toInt() + output).toByte().toHex()
 
-        val commandHex = "ff000002${command}${outputHex}${checksumHex}"
+        val commandHex = "ff000002${command}${outputHex}$checksumHex"
 
         log.info("Sending $commandHex")
         outputStream.write(commandHex.hexStringToByteArray())
