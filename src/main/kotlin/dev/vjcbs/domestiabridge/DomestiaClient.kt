@@ -41,7 +41,7 @@ class DomestiaClient(
         try {
             outputStream.write(data)
         } catch (e: Exception) {
-            log.warn("Writing to socket failed, reopening (${e.message})")
+            log.warn("Writing to socket failed, reopening (${e::class})")
             connect()
             outputStream.write(data)
         }
@@ -53,9 +53,9 @@ class DomestiaClient(
         val response = ByteArray(responseLength)
 
         try {
-            inputStream.readFully(response, 0, response.size)
+            inputStream.read(response)
         } catch (e: Exception) {
-            log.warn("Reading from socket failed, reopening (${e.message})")
+            log.warn("Reading from socket failed, reopening (${e::class})")
             connect()
             // Makes no sense to try and read again since we've lost the connection
         }
