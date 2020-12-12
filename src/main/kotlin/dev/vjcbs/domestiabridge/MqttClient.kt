@@ -3,7 +3,7 @@ package dev.vjcbs.domestiabridge
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions
 import org.eclipse.paho.client.mqttv3.MqttMessage
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence
-import java.util.*
+import java.util.UUID
 import org.eclipse.paho.client.mqttv3.MqttClient as Paho
 
 class MqttClient(
