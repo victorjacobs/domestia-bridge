@@ -54,7 +54,7 @@ fun main(): Unit = runBlocking {
                 }
             }
 
-            delay(1500)
+            delay(2000)
         }
     }
 }
