@@ -1,14 +1,14 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 val logbackVersion = "1.2.3"
-val hopliteVersion = "1.3.9"
-val kotlinVersion = "1.4.20"
+val hopliteVersion = "1.3.10"
+val kotlinVersion = "1.4.21"
 val kotlinxCoroutinesVersion = "1.4.2"
-val pahoVersion = "1.2.0"
+val pahoVersion = "1.2.5"
 
 plugins {
     application
-    kotlin("jvm") version "1.4.20"
+    kotlin("jvm") version "1.4.21"
     id("com.github.johnrengelman.shadow") version "6.1.0"
     id("org.jlleitschuh.gradle.ktlint") version "9.4.1"
 }
