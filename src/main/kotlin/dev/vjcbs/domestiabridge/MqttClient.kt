@@ -3,7 +3,7 @@ package dev.vjcbs.domestiabridge
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions
 import org.eclipse.paho.client.mqttv3.MqttMessage
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence
-import java.util.UUID
+import java.util.*
 import org.eclipse.paho.client.mqttv3.MqttClient as Paho
 
 class MqttClient(
@@ -42,7 +42,6 @@ class MqttClient(
         log.info("[$topic] Subscribing")
 
         mqtt.subscribe(topic) { _, message ->
-            // TODO JSON parsing?
             log.info("[$topic] Message received $message")
             callback(message.toString())
         }

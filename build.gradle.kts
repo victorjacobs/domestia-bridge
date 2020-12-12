@@ -5,6 +5,7 @@ val hopliteVersion = "1.3.10"
 val kotlinVersion = "1.4.21"
 val kotlinxCoroutinesVersion = "1.4.2"
 val pahoVersion = "1.2.5"
+val klaxonVersion = "5.0.1"
 
 plugins {
     application
@@ -18,6 +19,7 @@ version = "1.0-SNAPSHOT"
 
 repositories {
     mavenCentral()
+    jcenter()
     maven("https://jitpack.io")
 }
 
@@ -36,6 +38,7 @@ dependencies {
     implementation("com.sksamuel.hoplite:hoplite-core:$hopliteVersion")
     implementation("com.sksamuel.hoplite:hoplite-yaml:$hopliteVersion")
     implementation("org.eclipse.paho:org.eclipse.paho.client.mqttv3:$pahoVersion")
+    implementation("com.beust:klaxon:$klaxonVersion")
 }
 
 tasks.withType<KotlinCompile> {

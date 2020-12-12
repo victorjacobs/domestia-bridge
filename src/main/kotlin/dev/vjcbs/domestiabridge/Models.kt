@@ -3,7 +3,7 @@ package dev.vjcbs.domestiabridge
 data class Light(
     val name: String,
     val output: Int,
-    val on: Boolean,
+    val brightness: Int, // [0..255]
     val dimmable: Boolean
 ) {
     val uniqueId = "d_$output"
@@ -24,11 +24,15 @@ data class Light(
         }
         """.trimIndent()
 
-    // {"state": "ON", "brightness": 255}
     val state =
         """
         {
-          "state": "${if (on) "ON" else "OFF"}"
+          "state": "${if (brightness != 0) "ON" else "OFF"}"${if (dimmable) ", \"brightness\": $brightness" else ""}
         }
         """.trimIndent()
 }
+
+data class LightCommand(
+    val state: String,
+    val brightness: Int? = null
+)

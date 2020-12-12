@@ -5,6 +5,7 @@ import java.io.DataOutputStream
 import java.net.Socket
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
+import kotlin.math.roundToInt
 
 class DomestiaClient(
     private val config: DomestiaConfig
@@ -72,34 +73,49 @@ class DomestiaClient(
 
         // First three bytes are the header
         return response.drop(3).mapIndexed { index, byte ->
-            outputToLightConfig[index]?.let {
-                if (it.ignore) {
+            outputToLightConfig[index]?.let { lightConfig ->
+                if (lightConfig.ignore) {
                     null
                 } else {
                     Light(
-                        it.name,
-                        it.output,
-                        byte.toInt() != 0,
-                        it.dimmable
+                        lightConfig.name,
+                        lightConfig.output,
+                        (byte.toInt().toFloat() * (255.0 / 63.0)).roundToInt(), // The controller returns brightness [0..63] so convert it here to [0..255]
+                        lightConfig.dimmable
                     )
                 }
             }
         }.filterNotNull()
     }
 
-    fun turnOnLight(light: Light) {
+    fun setBrightness(light: Light, brightness: Int) {
+        // Convert brightness range [0..255] to [0..63]
+        val convertedBrightness = (brightness.coerceAtMost(255).coerceAtLeast(0).toFloat() * (63.0 / 255.0)).roundToInt()
+
+        val outputHex = light.output.toByte().toHex()
+        val brightnessHex = convertedBrightness.toByte().toHex()
+        val checksumHex = ("10".hexStringToByteArray().first().toInt() + convertedBrightness + light.output).toByte().toHex()
+
+        val commandHex = "ff00000310${outputHex}${brightnessHex}$checksumHex"
+
+        val response = writeSafelyWithResponse(commandHex.hexStringToByteArray(), 2)
+
+        log.info("Response: ${String(response)}")
+    }
+
+    fun turnOn(light: Light) {
         // On is 0e
-        sendToggleCommand("0e", light.output)
+        toggle(light, "0e")
     }
 
-    fun turnOffLight(light: Light) {
+    fun turnOff(light: Light) {
         // Off is 0f
-        sendToggleCommand("0f", light.output)
+        toggle(light, "0f")
     }
 
-    private fun sendToggleCommand(command: String, output: Int) {
-        val outputHex = output.toByte().toHex()
-        val checksumHex = (command.hexStringToByteArray().first().toInt() + output).toByte().toHex()
+    private fun toggle(light: Light, command: String) {
+        val outputHex = light.output.toByte().toHex()
+        val checksumHex = (command.hexStringToByteArray().first().toInt() + light.output).toByte().toHex()
 
         val commandHex = "ff000002${command}${outputHex}$checksumHex"
 

@@ -8,5 +8,7 @@ domestia:
   lights:
     - output: 1
       name: Kitchen
+      ignore: true
     - output: 16
       name: Office
+      dimmable: true
