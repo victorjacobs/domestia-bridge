@@ -18,7 +18,6 @@ fun main(): Unit = runBlocking {
     // Publish all configuration and state + subscribe to command topics
     entityIdToLight.forEach { (_, l) ->
         mqttClient.publish(l.configTopic, l.configuration)
-        delay(500)
         mqttClient.publish(l.stateTopic, l.state)
 
         mqttClient.subscribe(l.cmdTopic) { message ->
