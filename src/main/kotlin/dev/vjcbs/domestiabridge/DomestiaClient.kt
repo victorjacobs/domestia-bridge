@@ -4,6 +4,7 @@ import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.net.Socket
 import java.util.concurrent.locks.ReentrantLock
+import kotlin.concurrent.withLock
 
 class DomestiaClient(
     private val config: DomestiaConfig
@@ -27,7 +28,7 @@ class DomestiaClient(
         inputStream = DataInputStream(socket.getInputStream())
     }
 
-    fun reconnect() = synchronized(lock) {
+    fun reconnect() = lock.withLock {
         outputStream.close()
         inputStream.close()
         socket.close()
@@ -35,7 +36,7 @@ class DomestiaClient(
         connect()
     }
 
-    private fun writeSafely(data: ByteArray) = synchronized(lock) {
+    private fun writeSafely(data: ByteArray) = lock.withLock {
         log.info("Sending ${data.toHex()}")
 
         try {
@@ -47,7 +48,7 @@ class DomestiaClient(
         }
     }
 
-    private fun writeSafelyWithResponse(data: ByteArray, responseLength: Int): ByteArray = synchronized(lock) {
+    private fun writeSafelyWithResponse(data: ByteArray, responseLength: Int): ByteArray = lock.withLock {
         writeSafely(data)
 
         val response = ByteArray(responseLength)
