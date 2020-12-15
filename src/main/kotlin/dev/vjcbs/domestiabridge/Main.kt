@@ -54,7 +54,6 @@ fun main(): Unit = runBlocking {
                         entityIdToLight[lightStatus.entityId] = lightStatus
                     }
                 }
-
                 delay(config.domestia.refreshFrequency)
             } catch (e: Throwable) {
                 log.warn("getStatus failed: ${e::class} ${e.message}")
