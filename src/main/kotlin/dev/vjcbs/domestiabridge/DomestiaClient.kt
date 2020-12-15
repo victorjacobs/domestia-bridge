@@ -64,7 +64,7 @@ class DomestiaClient(
         } catch (e: Throwable) {
             log.warn("Reading from socket failed, reopening (${e::class})")
             connect()
-            // Makes no sense to try and read again since we've lost the connection
+            return ByteArray(0)
         }
 
         log.info("Received ${response.toHex()}")
