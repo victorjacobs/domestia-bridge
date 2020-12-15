@@ -24,7 +24,9 @@ class DomestiaClient(
     }
 
     private fun connect() {
-        socket = Socket(config.ipAddress, 52001)
+        socket = Socket(config.ipAddress, 52001).also {
+            it.soTimeout = 500
+        }
         outputStream = DataOutputStream(socket.getOutputStream())
         inputStream = DataInputStream(socket.getInputStream())
     }
