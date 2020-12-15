@@ -5,6 +5,7 @@ mqtt:
 
 domestia:
   ip_address: 192.168.1.2
+  refresh_frequency: 2000
   lights:
     - output: 1
       name: Kitchen

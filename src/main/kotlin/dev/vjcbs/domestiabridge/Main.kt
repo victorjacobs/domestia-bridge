@@ -35,7 +35,7 @@ fun main(): Unit = runBlocking {
         }
     }
 
-    // Periodically kill and reconnect socket
+    // Periodically Reconnect socket
     launch {
         while (true) {
             delay(30000)
@@ -47,14 +47,18 @@ fun main(): Unit = runBlocking {
     // Query controller regularly to get state
     launch {
         while (true) {
-            domestiaClient.getStatus().forEach { lightStatus ->
-                if (entityIdToLight[lightStatus.entityId]?.brightness != lightStatus.brightness) {
-                    mqttClient.publish(lightStatus.stateTopic, lightStatus.state)
-                    entityIdToLight[lightStatus.entityId] = lightStatus
+            try {
+                domestiaClient.getStatus().forEach { lightStatus ->
+                    if (entityIdToLight[lightStatus.entityId]?.brightness != lightStatus.brightness) {
+                        mqttClient.publish(lightStatus.stateTopic, lightStatus.state)
+                        entityIdToLight[lightStatus.entityId] = lightStatus
+                    }
                 }
-            }
 
-            delay(1000)
+                delay(config.domestia.refreshFrequency)
+            } catch (e: Throwable) {
+                log.warn("getStatus failed: ${e::class} ${e.message}")
+            }
         }
     }
 }

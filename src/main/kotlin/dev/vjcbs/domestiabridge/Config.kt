@@ -13,6 +13,7 @@ data class MqttConfig(
 
 data class DomestiaConfig(
     val ipAddress: String,
+    val refreshFrequency: Long = 1000,
     val lights: List<LightConfig>
 )
 
