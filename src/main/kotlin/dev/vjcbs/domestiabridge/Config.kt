@@ -19,7 +19,8 @@ data class DomestiaConfig(
 
 data class LightConfig(
     val name: String,
-    val output: Int,
+    val port: Int,
     val ignore: Boolean = false,
-    val dimmable: Boolean = false
+    val dimmable: Boolean = false,
+    val alwaysOn: Boolean = false
 )

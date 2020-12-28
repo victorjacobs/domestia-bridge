@@ -17,7 +17,7 @@ class DomestiaClient(
     private lateinit var outputStream: DataOutputStream
     private lateinit var inputStream: DataInputStream
 
-    private val outputToLightConfig = config.lights.map { l -> l.output - 1 to l }.toMap()
+    private val portToLightConfig = config.lights.map { l -> l.port - 1 to l }.toMap()
 
     init {
         connect()
@@ -78,13 +78,13 @@ class DomestiaClient(
 
         // First three bytes are the header
         return response.drop(3).mapIndexed { index, byte ->
-            outputToLightConfig[index]?.let { lightConfig ->
+            portToLightConfig[index]?.let { lightConfig ->
                 if (lightConfig.ignore) {
                     null
                 } else {
                     Light(
                         lightConfig.name,
-                        lightConfig.output,
+                        lightConfig.port,
                         (byte.toInt().toFloat() * (255.0 / 63.0)).roundToInt(), // The controller returns brightness [0..63] so convert it here to [0..255]
                         lightConfig.dimmable
                     )
@@ -97,11 +97,11 @@ class DomestiaClient(
         // Convert brightness range [0..255] to [0..63]
         val convertedBrightness = (brightness.coerceAtMost(255).coerceAtLeast(0).toFloat() * (63.0 / 255.0)).roundToInt()
 
-        val outputHex = light.output.toByte().toHex()
+        val portHex = light.port.toByte().toHex()
         val brightnessHex = convertedBrightness.toByte().toHex()
-        val checksumHex = ("10".hexStringToByteArray().first().toInt() + convertedBrightness + light.output).toByte().toHex()
+        val checksumHex = ("10".hexStringToByteArray().first().toInt() + convertedBrightness + light.port).toByte().toHex()
 
-        val commandHex = "ff00000310${outputHex}${brightnessHex}$checksumHex"
+        val commandHex = "ff00000310${portHex}${brightnessHex}$checksumHex"
 
         val response = writeSafelyWithResponse(commandHex.hexStringToByteArray(), 2)
 
@@ -109,20 +109,18 @@ class DomestiaClient(
     }
 
     fun turnOn(light: Light) {
-        // On is 0e
         toggle(light, "0e")
     }
 
     fun turnOff(light: Light) {
-        // Off is 0f
         toggle(light, "0f")
     }
 
     private fun toggle(light: Light, command: String) {
-        val outputHex = light.output.toByte().toHex()
-        val checksumHex = (command.hexStringToByteArray().first().toInt() + light.output).toByte().toHex()
+        val portHex = light.port.toByte().toHex()
+        val checksumHex = (command.hexStringToByteArray().first().toInt() + light.port).toByte().toHex()
 
-        val commandHex = "ff000002${command}${outputHex}$checksumHex"
+        val commandHex = "ff000002${command}${portHex}$checksumHex"
 
         val response = writeSafelyWithResponse(commandHex.hexStringToByteArray(), 2)
 

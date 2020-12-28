@@ -2,11 +2,11 @@ package dev.vjcbs.domestiabridge
 
 data class Light(
     val name: String,
-    val output: Int,
+    val port: Int,
     val brightness: Int, // [0..255]
     val dimmable: Boolean
 ) {
-    val uniqueId = "d_$output"
+    val uniqueId = "d_$port"
     val entityId = "d_${name.toLowerCase().replace(" ", "_")}"
     val configTopic = "homeassistant/light/$entityId/config"
     val stateTopic = "homeassistant/light/$entityId/state"

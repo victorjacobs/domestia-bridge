@@ -1,11 +1,11 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 val logbackVersion = "1.2.3"
-val hopliteVersion = "1.3.10"
+val hopliteVersion = "1.3.11"
 val kotlinVersion = "1.4.21"
 val kotlinxCoroutinesVersion = "1.4.2"
 val pahoVersion = "1.2.5"
-val klaxonVersion = "5.0.1"
+val klaxonVersion = "5.4"
 
 plugins {
     application

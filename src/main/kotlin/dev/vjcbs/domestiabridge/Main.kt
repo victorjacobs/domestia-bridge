@@ -35,21 +35,14 @@ fun main(): Unit = runBlocking {
         }
     }
 
-    // Periodically Reconnect socket
-    launch {
-        while (true) {
-            delay(30000)
-            domestiaClient.reconnect()
-            log.info("Reconnected")
-        }
-    }
-
     // Query controller regularly to get state
     launch {
         while (true) {
             try {
                 domestiaClient.getStatus().forEach { lightStatus ->
-                    if (entityIdToLight[lightStatus.entityId]?.brightness != lightStatus.brightness) {
+                    val light = entityIdToLight[lightStatus.entityId]
+
+                    if (light?.brightness != lightStatus.brightness) {
                         mqttClient.publish(lightStatus.stateTopic, lightStatus.state)
                         entityIdToLight[lightStatus.entityId] = lightStatus
                     }
