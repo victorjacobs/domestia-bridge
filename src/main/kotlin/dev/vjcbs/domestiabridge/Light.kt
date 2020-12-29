@@ -35,7 +35,7 @@ data class Light(
         """.trimIndent()
 
     companion object {
-        fun fromDomestia(config: LightConfig, brightness: Int) =
+        fun fromDomestia(config: Config.Light, brightness: Int) =
             Light(
                 name = config.name,
                 brightness = (brightness.toFloat() * (255.0 / 63.0)).roundToInt(), // The controller returns brightness [0..63] so convert it to [0..255]

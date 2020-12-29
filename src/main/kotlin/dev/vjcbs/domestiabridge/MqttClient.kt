@@ -7,7 +7,7 @@ import java.util.UUID
 import org.eclipse.paho.client.mqttv3.MqttClient as Paho
 
 class MqttClient(
-    config: MqttConfig
+    config: Config.Mqtt
 ) {
     private val log = logger()
     private val mqttClient = Paho(

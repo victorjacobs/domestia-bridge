@@ -8,7 +8,7 @@ import kotlin.concurrent.withLock
 import kotlin.math.roundToInt
 
 class DomestiaClient(
-    private val config: DomestiaConfig
+    private val config: Config.Domestia
 ) {
     private val lock = ReentrantLock()
     private val log = logger()
