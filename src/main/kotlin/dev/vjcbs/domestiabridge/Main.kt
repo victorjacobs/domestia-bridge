@@ -41,12 +41,14 @@ fun main(): Unit = runBlocking {
     launch {
         while (true) {
             try {
-                domestiaClient.getStatus().forEach { lightStatus ->
-                    val light = entityIdToLight[lightStatus.entityId]
+                domestiaClient.getStatus().forEach { light ->
+                    if (entityIdToLight[light.entityId]?.brightness != light.brightness) {
+                        mqttClient.publish(light.stateTopic, light.state)
+                        entityIdToLight[light.entityId] = light
+                    }
 
-                    if (light?.brightness != lightStatus.brightness) {
-                        mqttClient.publish(lightStatus.stateTopic, lightStatus.state)
-                        entityIdToLight[lightStatus.entityId] = lightStatus
+                    if (light.alwaysOn && light.brightness == 0) {
+                        domestiaClient.turnOn(light)
                     }
                 }
                 delay(config.domestia.refreshFrequency)

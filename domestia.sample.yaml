@@ -12,4 +12,7 @@ domestia:
       ignore: true
     - port: 16
       name: Office
+      # Whether the port is dimmable
       dimmable: true
+      # If always_on is set, the light will be turned on every time it is turned off. Useful for Hue bulbs
+      always_on: true
