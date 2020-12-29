@@ -31,6 +31,14 @@ class DomestiaClient(
         inputStream = DataInputStream(socket.getInputStream())
     }
 
+    fun reconnect() = lock.withLock {
+        outputStream.close()
+        inputStream.close()
+        socket.close()
+
+        connect()
+    }
+
     private fun writeSafely(data: ByteArray) = lock.withLock {
         log.info("Sending ${data.toHex()}")
 
