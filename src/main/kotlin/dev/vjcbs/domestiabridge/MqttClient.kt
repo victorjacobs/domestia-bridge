@@ -10,7 +10,7 @@ class MqttClient(
     config: MqttConfig
 ) {
     private val log = logger()
-    private val mqtt = Paho(
+    private val mqttClient = Paho(
         "tcp://${config.ipAddress}:1883",
         "domestia-${UUID.randomUUID()}",
         MemoryPersistence()
@@ -24,13 +24,13 @@ class MqttClient(
     }
 
     init {
-        mqtt.connect(mqttOptions)
+        mqttClient.connect(mqttOptions)
     }
 
     fun publish(topic: String, data: String) {
         log.info("[$topic] Publishing ${data.replace("\n","").replace(" ", "")}")
 
-        mqtt.publish(
+        mqttClient.publish(
             topic,
             MqttMessage(data.toByteArray()).apply {
                 isRetained = true
@@ -41,7 +41,7 @@ class MqttClient(
     fun subscribe(topic: String, callback: ((String) -> Unit)) {
         log.info("[$topic] Subscribing")
 
-        mqtt.subscribe(topic) { _, message ->
+        mqttClient.subscribe(topic) { _, message ->
             log.info("[$topic] Message received $message")
             callback(message.toString())
         }

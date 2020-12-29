@@ -1,10 +1,12 @@
 package dev.vjcbs.domestiabridge
 
-import com.beust.klaxon.Klaxon
 import com.sksamuel.hoplite.ConfigLoader
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 import java.nio.file.Path
 
 fun main(): Unit = runBlocking {
@@ -21,7 +23,7 @@ fun main(): Unit = runBlocking {
         mqttClient.publish(l.stateTopic, l.state)
 
         mqttClient.subscribe(l.cmdTopic) { message ->
-            Klaxon().parse<LightCommand>(message)?.let { cmd ->
+            Json.decodeFromString<LightCommand>(message).let { cmd ->
                 if (cmd.state == "ON") {
                     domestiaClient.turnOn(l)
 
@@ -54,3 +56,9 @@ fun main(): Unit = runBlocking {
         }
     }
 }
+
+@Serializable
+data class LightCommand(
+    val state: String,
+    val brightness: Int? = null
+)

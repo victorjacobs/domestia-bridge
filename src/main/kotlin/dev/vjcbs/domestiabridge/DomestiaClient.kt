@@ -31,14 +31,6 @@ class DomestiaClient(
         inputStream = DataInputStream(socket.getInputStream())
     }
 
-    fun reconnect() = lock.withLock {
-        outputStream.close()
-        inputStream.close()
-        socket.close()
-
-        connect()
-    }
-
     private fun writeSafely(data: ByteArray) = lock.withLock {
         log.info("Sending ${data.toHex()}")
 
@@ -82,12 +74,7 @@ class DomestiaClient(
                 if (lightConfig.ignore) {
                     null
                 } else {
-                    Light(
-                        lightConfig.name,
-                        lightConfig.port,
-                        (byte.toInt().toFloat() * (255.0 / 63.0)).roundToInt(), // The controller returns brightness [0..63] so convert it here to [0..255]
-                        lightConfig.dimmable
-                    )
+                    Light.fromDomestia(lightConfig, byte.toInt())
                 }
             }
         }.filterNotNull()

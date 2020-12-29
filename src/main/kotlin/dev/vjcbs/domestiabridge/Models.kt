@@ -1,10 +1,13 @@
 package dev.vjcbs.domestiabridge
 
+import kotlin.math.roundToInt
+
 data class Light(
     val name: String,
     val port: Int,
     val brightness: Int, // [0..255]
-    val dimmable: Boolean
+    val dimmable: Boolean,
+    val alwaysOn: Boolean
 ) {
     val uniqueId = "d_$port"
     val entityId = "d_${name.toLowerCase().replace(" ", "_")}"
@@ -30,9 +33,15 @@ data class Light(
           "state": "${if (brightness != 0) "ON" else "OFF"}"${if (dimmable) ", \"brightness\": $brightness" else ""}
         }
         """.trimIndent()
-}
 
-data class LightCommand(
-    val state: String,
-    val brightness: Int? = null
-)
+    companion object {
+        fun fromDomestia(config: LightConfig, brightness: Int) =
+            Light(
+                name = config.name,
+                brightness = (brightness.toFloat() * (255.0 / 63.0)).roundToInt(), // The controller returns brightness [0..63] so convert it to [0..255]
+                port = config.port,
+                dimmable = config.dimmable,
+                alwaysOn = config.alwaysOn
+            )
+    }
+}

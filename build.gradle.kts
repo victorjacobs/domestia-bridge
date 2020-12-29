@@ -4,12 +4,13 @@ val logbackVersion = "1.2.3"
 val hopliteVersion = "1.3.11"
 val kotlinVersion = "1.4.21"
 val kotlinxCoroutinesVersion = "1.4.2"
+val kotlinxSerialization = "1.0.1"
 val pahoVersion = "1.2.5"
-val klaxonVersion = "5.4"
 
 plugins {
     application
     kotlin("jvm") version "1.4.21"
+    kotlin("plugin.serialization") version "1.4.21"
     id("com.github.johnrengelman.shadow") version "6.1.0"
     id("org.jlleitschuh.gradle.ktlint") version "9.4.1"
 }
@@ -33,12 +34,12 @@ dependencies {
     implementation(kotlin("stdlib-jdk8"))
     implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinxCoroutinesVersion")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinxSerialization")
 
     implementation("ch.qos.logback:logback-classic:$logbackVersion")
     implementation("com.sksamuel.hoplite:hoplite-core:$hopliteVersion")
     implementation("com.sksamuel.hoplite:hoplite-yaml:$hopliteVersion")
     implementation("org.eclipse.paho:org.eclipse.paho.client.mqttv3:$pahoVersion")
-    implementation("com.beust:klaxon:$klaxonVersion")
 }
 
 tasks.withType<KotlinCompile> {
