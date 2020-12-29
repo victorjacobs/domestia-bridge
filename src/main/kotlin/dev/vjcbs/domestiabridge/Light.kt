@@ -7,7 +7,8 @@ data class Light(
     val port: Int,
     val brightness: Int, // [0..255]
     val dimmable: Boolean,
-    val alwaysOn: Boolean
+    val alwaysOn: Boolean,
+    val controllable: Boolean
 ) {
     val uniqueId = "d_$port"
     val entityId = "d_${name.toLowerCase().replace(" ", "_")}"
@@ -41,7 +42,8 @@ data class Light(
                 brightness = (brightness.toFloat() * (255.0 / 63.0)).roundToInt(), // The controller returns brightness [0..63] so convert it to [0..255]
                 port = config.port,
                 dimmable = config.dimmable,
-                alwaysOn = config.alwaysOn
+                alwaysOn = config.alwaysOn,
+                controllable = config.controllable
             )
     }
 }

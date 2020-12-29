@@ -71,11 +71,7 @@ class DomestiaClient(
         // First three bytes are the header
         return response.drop(3).mapIndexed { index, byte ->
             portToLightConfig[index]?.let { lightConfig ->
-                if (lightConfig.ignore) {
-                    null
-                } else {
-                    Light.fromDomestia(lightConfig, byte.toInt())
-                }
+                Light.fromDomestia(lightConfig, byte.toInt())
             }
         }.filterNotNull()
     }

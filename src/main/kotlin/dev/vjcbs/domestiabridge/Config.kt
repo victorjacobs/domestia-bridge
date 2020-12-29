@@ -19,7 +19,7 @@ data class Config(
     data class Light(
         val name: String,
         val port: Int,
-        val ignore: Boolean = false,
+        val controllable: Boolean = true,
         val dimmable: Boolean = false,
         val alwaysOn: Boolean = false
     )

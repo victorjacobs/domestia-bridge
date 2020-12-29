@@ -5,14 +5,15 @@ mqtt:
 
 domestia:
   ip_address: 192.168.1.2
-  refresh_frequency: 2000
+  refresh_frequency: 1000
   lights:
     - port: 1
       name: Kitchen
-      ignore: true
     - port: 16
       name: Office
       # Whether the port is dimmable
-      dimmable: true
+      dimmable: false
       # If always_on is set, the light will be turned on every time it is turned off. Useful for Hue bulbs
-      always_on: true
+      always_on: false
+      # Whether or not to expose this light to Home Assistant
+      controllable: true

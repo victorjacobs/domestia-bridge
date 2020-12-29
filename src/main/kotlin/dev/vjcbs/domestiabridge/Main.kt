@@ -18,7 +18,7 @@ fun main(): Unit = runBlocking {
     val entityIdToLight = domestiaClient.getStatus().map { l -> l.entityId to l }.toMap().toMutableMap()
 
     // Publish all configuration and state + subscribe to command topics
-    entityIdToLight.forEach { (_, l) ->
+    entityIdToLight.filter { (_, l) -> l.controllable }.forEach { (_, l) ->
         mqttClient.publish(l.configTopic, l.configuration)
         mqttClient.publish(l.stateTopic, l.state)
 
@@ -42,7 +42,7 @@ fun main(): Unit = runBlocking {
         while (true) {
             try {
                 domestiaClient.getStatus().forEach { light ->
-                    if (entityIdToLight[light.entityId]?.brightness != light.brightness) {
+                    if (light.controllable && entityIdToLight[light.entityId]?.brightness != light.brightness) {
                         mqttClient.publish(light.stateTopic, light.state)
                         entityIdToLight[light.entityId] = light
                     }
