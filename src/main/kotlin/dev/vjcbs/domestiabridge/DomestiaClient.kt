@@ -1,5 +1,6 @@
 package dev.vjcbs.domestiabridge
 
+import kotlinx.coroutines.delay
 import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.net.Socket
@@ -46,6 +47,9 @@ class DomestiaClient(
             outputStream.write(data)
         } catch (e: Throwable) {
             log.warn("Writing to socket failed, reopening (${e::class})")
+
+            Thread.sleep(5000)
+
             connect()
             outputStream.write(data)
         }
@@ -63,6 +67,9 @@ class DomestiaClient(
             inputStream.read(response)
         } catch (e: Throwable) {
             log.warn("Reading from socket failed, reopening (${e::class})")
+
+            Thread.sleep(5000)
+
             connect()
             return ByteArray(0)
         }
