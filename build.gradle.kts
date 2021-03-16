@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 val logbackVersion = "1.2.3"
-val hopliteVersion = "1.3.11"
+val hopliteVersion = "1.4.0"
 val kotlinVersion = "1.4.21"
 val kotlinxCoroutinesVersion = "1.4.2"
 val kotlinxSerialization = "1.0.1"
@@ -12,7 +12,7 @@ plugins {
     kotlin("jvm") version "1.4.21"
     kotlin("plugin.serialization") version "1.4.21"
     id("com.github.johnrengelman.shadow") version "6.1.0"
-    id("org.jlleitschuh.gradle.ktlint") version "9.4.1"
+    id("org.jlleitschuh.gradle.ktlint") version "10.0.0"
 }
 
 group = "dev.vjcbs"

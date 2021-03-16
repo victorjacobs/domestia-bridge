@@ -1,6 +1,5 @@
 package dev.vjcbs.domestiabridge
 
-import kotlinx.coroutines.delay
 import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.net.Socket
@@ -20,10 +19,6 @@ class DomestiaClient(
 
     private val portToLightConfig = config.lights.map { l -> l.port - 1 to l }.toMap()
 
-    init {
-        connect()
-    }
-
     private fun connect() {
         socket = Socket(config.ipAddress, 52001).apply {
             soTimeout = 500
@@ -32,33 +27,21 @@ class DomestiaClient(
         inputStream = DataInputStream(socket.getInputStream())
     }
 
-    fun reconnect() = lock.withLock {
+    private fun close() {
         outputStream.close()
         inputStream.close()
         socket.close()
-
-        connect()
     }
 
-    private fun writeSafely(data: ByteArray) = lock.withLock {
-        log.info("Sending ${data.toHex()}")
+    private fun send(data: ByteArray, responseLength: Int): ByteArray = lock.withLock {
+        connect()
 
         try {
             outputStream.write(data)
         } catch (e: Throwable) {
-            log.warn("Writing to socket failed, reopening (${e::class})")
-
-            Thread.sleep(5000)
-
-            connect()
-            outputStream.write(data)
+            log.warn("Writing to socket failed (${e::class})")
+            return ByteArray(0)
         }
-
-        log.info("Sent")
-    }
-
-    private fun writeSafelyWithResponse(data: ByteArray, responseLength: Int): ByteArray = lock.withLock {
-        writeSafely(data)
 
         log.info("Reading $responseLength bytes")
         val response = ByteArray(responseLength)
@@ -66,22 +49,23 @@ class DomestiaClient(
         try {
             inputStream.read(response)
         } catch (e: Throwable) {
-            log.warn("Reading from socket failed, reopening (${e::class})")
+            log.warn("Reading from socket failed (${e::class})")
 
             Thread.sleep(5000)
 
-            connect()
             return ByteArray(0)
         }
 
         log.info("Received ${response.toHex()}")
+
+        close()
 
         return response
     }
 
     fun getStatus(): List<Light> {
         // Status response is 51 bytes (maybe variable)
-        val response = writeSafelyWithResponse("ff0000013c3c20".hexStringToByteArray(), 51)
+        val response = send("ff0000013c3c20".hexStringToByteArray(), 51)
 
         // First three bytes are the header
         return response.drop(3).mapIndexed { index, byte ->
@@ -101,7 +85,7 @@ class DomestiaClient(
 
         val commandHex = "ff00000310${portHex}${brightnessHex}$checksumHex"
 
-        val response = writeSafelyWithResponse(commandHex.hexStringToByteArray(), 2)
+        val response = send(commandHex.hexStringToByteArray(), 2)
 
         log.info("Response: ${String(response)}")
     }
@@ -120,7 +104,7 @@ class DomestiaClient(
 
         val commandHex = "ff000002${command}${portHex}$checksumHex"
 
-        val response = writeSafelyWithResponse(commandHex.hexStringToByteArray(), 2)
+        val response = send(commandHex.hexStringToByteArray(), 2)
 
         log.info("Response: ${String(response)}")
     }

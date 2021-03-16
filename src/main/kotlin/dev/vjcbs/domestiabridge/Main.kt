@@ -37,15 +37,6 @@ fun main(): Unit = runBlocking {
         }
     }
 
-    // Periodically Reconnect socket
-    launch {
-        while (true) {
-            delay(30000)
-            domestiaClient.reconnect()
-            log.info("Reconnected")
-        }
-    }
-
     // Query controller regularly to get state
     launch {
         while (true) {
